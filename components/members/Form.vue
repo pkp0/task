@@ -1,35 +1,29 @@
-<template>
-  <v-form @submit.prevent="submit">
-    <v-text-field v-model="firstName" label="First Name" />
-
-    <v-text-field v-model="lastName" label="Last Name" />
-
-    <v-btn type="submit">{{ isEdit ? 'Update' : 'Create' }}</v-btn>
-  </v-form>
-</template>
-
-<script setup>
-import { ref, watchEffect, watch } from 'vue';
+<script setup lang="ts">
+import { ref, watch, defineProps, defineEmits } from 'vue';
 import { useMembersStore } from '@/stores/members.ts';
+import type { Member } from '@/stores/members.ts';
 
-const props = defineProps(['id']);
-const emit = defineEmits(['closeDialog']);
+const props = defineProps<{
+  id?: number;
+}>();
+const emit = defineEmits<{
+  (event: 'closeDialog'): void;
+}>();
 
 const membersStore = useMembersStore();
 
-const firstName = ref('');
-const lastName = ref('');
+const firstName = ref<string>('');
+const lastName = ref<string>('');
 
-const isEdit = ref(false);
-const isSubmitting = ref(false);
+const isEdit = ref<boolean>(false);
+const isSubmitting = ref<boolean>(false);
 
-const setValues = (id) => {
+const setValues = (id: number) => {
   const member = membersStore.member(id);
 
   if (member) {
     firstName.value = member.firstName;
     lastName.value = member.lastName;
-
     isEdit.value = true;
   }
 };
@@ -39,16 +33,13 @@ const submit = () => {
 
   isSubmitting.value = true;
 
-  const data = {
+  const data: Omit<Member, 'id'> = {
     firstName: firstName.value,
     lastName: lastName.value
   };
 
   if (isEdit.value) {
-    membersStore.updateMember({
-      id: props.id,
-      ...data
-    });
+    membersStore.updateMember({ id: props.id!, ...data });
   } else {
     membersStore.addMember(data);
   }
@@ -65,5 +56,13 @@ watch(() => props.id, (newValue) => {
     lastName.value = '';
     isEdit.value = false;
   }
-}, { immediate: true, deep: true });
+}, { immediate: true });
 </script>
+
+<template>
+  <v-form @submit.prevent="submit">
+    <v-text-field v-model="firstName" label="First Name" />
+    <v-text-field v-model="lastName" label="Last Name" />
+    <v-btn type="submit">{{ isEdit ? 'Update' : 'Create' }}</v-btn>
+  </v-form>
+</template>

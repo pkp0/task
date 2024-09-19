@@ -1,3 +1,43 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useTasksStore } from '~/stores/tasks';
+import TaskCard from '~/components/tasks/TaskCard.vue';
+import Dialog from '~/components/Dialog.vue';
+import TaskForm from '~/components/tasks/TaskForm.vue';
+import { statusesEnum } from '~/stores/utils';
+
+const tasksStore = useTasksStore();
+const statuses = Object.values(statusesEnum);
+const draggedTask = ref<Task | null>(null);
+
+const isDialogVisible = ref(false);
+const status = ref<string>('');
+
+const tasks = computed(() => tasksStore.tasks);
+
+const closeDialog = () => {
+  isDialogVisible.value = false;
+};
+
+const filteredTasks = (status: string) => tasks.value.filter(task => task.status === status);
+
+const startDrag = (task: Task) => {
+  draggedTask.value = task;
+};
+
+const dropTask = (newStatus: string) => {
+  if (draggedTask.value) {
+    tasksStore.updateTaskStatus(draggedTask.value.id, newStatus as statusesEnum);
+    draggedTask.value = null;
+  }
+};
+
+const addTask = (selectedStatus: string) => {
+  isDialogVisible.value = true;
+  status.value = selectedStatus;
+};
+</script>
+
 <template>
   <v-row>
     <v-col
@@ -8,14 +48,10 @@
       <v-card class="pa-2" outlined>
         <div class="d-flex align-center justify-space-between">
           <v-card-title>{{ status }}</v-card-title>
-
           <v-card-subtitle>
-            <v-btn @click="addTask(status)" color="primary">
-              Add Task
-            </v-btn>
+            <v-btn @click="addTask(status)" color="primary">Add Task</v-btn>
           </v-card-subtitle>
         </div>
-
         <v-list>
           <v-list-item
               v-for="task in filteredTasks(status)"
@@ -26,9 +62,8 @@
               @dragover.prevent
               @drop="dropTask(status)"
           >
-            <TaskCard :task="task"/>
+            <TaskCard :task="task" />
           </v-list-item>
-
           <v-list-item
               v-if="filteredTasks(status).length === 0"
               class="drop-placeholder"
@@ -48,51 +83,10 @@
       @onClose="closeDialog"
   >
     <template #form-content="{ closeDialog }">
-      <TaskForm @close-dialog="closeDialog" :status="status"/>
+      <TaskForm @closeDialog="closeDialog" :status="status" />
     </template>
   </Dialog>
 </template>
-
-<script setup>
-import {ref, computed, watch} from 'vue'
-import {useTasksStore} from '@/stores/tasks.ts'
-
-import TaskCard from "~/components/tasks/TaskCard.vue";
-import Dialog from "../Dialog.vue";
-import TaskForm from "~/components/tasks/TaskForm.vue";
-import {statusesEnum} from "~/stores/utils.ts";
-
-const tasksStore = useTasksStore();
-const statuses = [statusesEnum.todo, statusesEnum.in_progress, statusesEnum.done];
-const draggedTask = ref(null);
-
-const isDialogVisible = ref(false);
-const status = ref('');
-
-const tasks = computed(() => tasksStore.tasks);
-
-const closeDialog = () => {
-  isDialogVisible.value = false;
-};
-
-const filteredTasks = (status) => tasks.value.filter(task => task.status === status);
-
-const startDrag = (task) => {
-  draggedTask.value = task;
-};
-
-const dropTask = (newStatus) => {
-  if (draggedTask.value) {
-    tasksStore.updateTaskStatus(draggedTask.value.id, newStatus);
-    draggedTask.value = null;
-  }
-};
-
-const addTask = (selectedStatus) => {
-  isDialogVisible.value = true;
-  status.value = selectedStatus;
-};
-</script>
 
 <style scoped>
 .task-card {

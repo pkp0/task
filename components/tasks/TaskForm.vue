@@ -1,75 +1,55 @@
-<template>
-  <v-form @submit.prevent="submitTask">
-    <v-text-field v-model="title" label="Title" required />
-    <v-textarea v-model="description" label="Description" />
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
+import { useTasksStore } from '~/stores/tasks';
+import { useMembersStore } from '~/stores/members';
+import { priorityEnum } from '~/stores/utils';
 
-    <v-select
-        v-model="members"
-        multiple
-        :items="allMembers"
-        label="Members"
-    />
+const props = defineProps<{
+  id?: number;
+  status?: string;
+}>();
 
-    <v-select
-        v-model="responsible"
-        :items="selectedMembers"
-        label="Responsible"
-    />
+const emit = defineEmits<{
+  (event: 'closeDialog'): void;
+}>();
 
-    <v-select
-        v-model="priority"
-        :items="priorityOptions"
-        label="Priority"
-    />
-
-    <v-btn type="submit">{{ isEdit ? 'Update' : 'Create' }}</v-btn>
-  </v-form>
-</template>
-
-<script setup>
-import {ref, computed, watch} from 'vue'
-import { useTasksStore } from "~/stores/tasks.ts";
-import { useMembersStore } from "~/stores/members.ts";
-import {priorityEnum} from "~/stores/utils.ts";
-
-const props = defineProps(['id', 'status']);
-const emit = defineEmits(['closeDialog'])
-
-const tasksStore = useTasksStore()
-const membersStore = useMembersStore()
+const tasksStore = useTasksStore();
+const membersStore = useMembersStore();
 
 const title = ref('');
 const description = ref('');
-const members = ref([]);
-const responsible = ref('');
-const priority = ref('');
-const status = ref(props.status);
-
+const members = ref<number[]>([]);
+const responsible = ref<number | ''>('');
+const priority = ref<priorityEnum>(priorityEnum.low);
+const status = ref<string | undefined>(props.status);
 const isEdit = ref(false);
 const isSubmitting = ref(false);
 
-const priorityOptions = [priorityEnum.high, priorityEnum.medium, priorityEnum.low];
+const priorityOptions = Object.values(priorityEnum);
 const allMembers = computed(() =>
-    membersStore.members.map(item => ({
-      value: item.id,
-      title: `${item.firstName} ${item.lastName}`
+    membersStore.members.map(member => ({
+      value: member.id,
+      title: `${member.firstName} ${member.lastName}`
     }))
 );
 const selectedMembers = computed(() =>
     members.value.map(memberId => {
       const member = membersStore.member(memberId);
-      return member ? { value: member.id, title: `${member.firstName} ${member.lastName}` } : null;
-    }).filter(item => item !== null)
+      return member ? {
+        value: member.id,
+        title: `${member.firstName} ${member.lastName}`
+      } : null;
+    }).filter((item): item is { value: number; title: string } => item !== null)
 );
 
-const setValues = (id) => {
+const setValues = (id: number) => {
   const task = tasksStore.task(id);
 
   if (task) {
     title.value = task.title;
     description.value = task.description;
-    members.value = task.members;
-    responsible.value = task.responsible;
+    members.value = task.members.map(member => member.id);
+    responsible.value = task.responsible.id;
     priority.value = task.priority;
     status.value = task.status;
 
@@ -83,19 +63,16 @@ const submitTask = () => {
   isSubmitting.value = true;
 
   const data = {
-    title,
-    description,
-    members,
-    responsible,
-    priority,
-    status,
+    title: title.value,
+    description: description.value,
+    members: members.value.map(memberId => membersStore.member(memberId)!),
+    responsible: membersStore.member(responsible.value as number)!,
+    priority: priority.value,
+    status: status.value!
   };
 
   if (isEdit.value) {
-    tasksStore.updateTask({
-      id: props.id,
-      ...data
-    });
+    tasksStore.updateTask({ id: props.id!, ...data });
   } else {
     tasksStore.addTask(data);
   }
@@ -104,7 +81,7 @@ const submitTask = () => {
   isSubmitting.value = false;
 };
 
-watch(() => props.id, (newValue) => {
+watch(() => props.id, newValue => {
   if (newValue) {
     setValues(newValue);
   } else {
@@ -112,16 +89,25 @@ watch(() => props.id, (newValue) => {
     description.value = '';
     members.value = [];
     responsible.value = '';
-    priority.value = '';
-
+    priority.value = priorityEnum.low;
     isEdit.value = false;
   }
-}, { immediate: true, deep: true });
-watch(selectedMembers, (newSelectedMembers) => {
-  const responsibleExists = newSelectedMembers.some(member => member.value === responsible.value);
+}, { immediate: true });
 
-  if (!responsibleExists) {
+watch(selectedMembers, newSelectedMembers => {
+  if (!newSelectedMembers.some(member => member.value === responsible.value)) {
     responsible.value = '';
   }
 });
 </script>
+
+<template>
+  <v-form @submit.prevent="submitTask">
+    <v-text-field v-model="title" label="Title" required />
+    <v-textarea v-model="description" label="Description" />
+    <v-select v-model="members" multiple :items="allMembers" label="Members" />
+    <v-select v-model="responsible" :items="selectedMembers" label="Responsible" />
+    <v-select v-model="priority" :items="priorityOptions" label="Priority" />
+    <v-btn type="submit">{{ isEdit ? 'Update' : 'Create' }}</v-btn>
+  </v-form>
+</template>
