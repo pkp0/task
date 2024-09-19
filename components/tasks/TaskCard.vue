@@ -5,7 +5,7 @@ import { useMembersStore } from '~/stores/members';
 import Dialog from '~/components/Dialog.vue';
 import TaskForm from '~/components/tasks/TaskForm.vue';
 import { priorityEnum } from '~/stores/utils';
-import { Task } from "~/stores/tasks";
+import type { Task } from "~/stores/tasks.ts";
 
 const props = defineProps<{
   task: Task;
@@ -67,7 +67,7 @@ watch(() => props.task, newValue => {
         <v-list-item>
           <v-list-item-title>Responsible:</v-list-item-title>
           <v-list-item-subtitle>
-            {{ fullName(task.responsible.id) }}
+            {{ fullName(task.responsible?.id) }}
           </v-list-item-subtitle>
         </v-list-item>
         <v-list-item>
