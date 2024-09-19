@@ -1,75 +1,63 @@
-# Nuxt 3 Minimal Starter
+# Nuxt.js Project
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+## Опис
 
-## Setup
+Цей проект є веб-додатком на базі Nuxt.js, який використовує Vue 3, Pinia для управління станом, та Vuetify для UI. Це сучасний фронтенд-додаток з підтримкою SSR (Server-Side Rendering) та генерації статичних сторінок.
 
-Make sure to install the dependencies:
+## Встановлення та запуск
 
-```bash
-# npm
-npm install
+Щоб запустити проект локально, виконайте наступні кроки:
 
-# pnpm
-pnpm install
+1. **Клонуйте репозиторій:**
 
-# yarn
-yarn install
+    ```bash
+    git clone https://github.com/pkp0/task.git
+    ```
 
-# bun
-bun install
-```
+2. **Перейдіть до директорії проекту:**
 
-## Development Server
+    ```bash
+    cd task
+    ```
 
-Start the development server on `http://localhost:3000`:
+3. **Встановіть залежності:**
 
-```bash
-# npm
-npm run dev
+   Переконайтеся, що у вас встановлений Node.js (версія 16 або новіша), а потім виконайте:
 
-# pnpm
-pnpm run dev
+    ```bash
+    npm install
+    ```
 
-# yarn
-yarn dev
+4. **Запустіть проект в режимі розробки:**
 
-# bun
-bun run dev
-```
+    ```bash
+    npm run dev
+    ```
 
-## Production
+   Ця команда запустить сервер розробки. Веб-додаток буде доступний за адресою `http://localhost:3000`.
 
-Build the application for production:
+5. **Побудуйте проект для продакшн середовища:**
 
-```bash
-# npm
-npm run build
+    ```bash
+    npm run build
+    ```
 
-# pnpm
-pnpm run build
+6. **Перегляньте згенеровану версію проекту:**
 
-# yarn
-yarn build
+    ```bash
+    npm run preview
+    ```
 
-# bun
-bun run build
-```
+7. **Генеруйте статичні файли проекту (опційно):**
 
-Locally preview production build:
+    ```bash
+    npm run generate
+    ```
 
-```bash
-# npm
-npm run preview
+## Технології
 
-# pnpm
-pnpm run preview
+- **Nuxt.js:** Framework для створення універсальних Vue.js додатків.
+- **Vue 3:** JavaScript фреймворк для створення інтерфейсів користувача.
+- **Pinia:** Сучасний стан-менеджер для Vue.js.
+- **Vuetify:** UI бібліотека для створення красивих інтерфейсів.
 
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
