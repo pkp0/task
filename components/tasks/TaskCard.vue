@@ -5,6 +5,7 @@ import { useMembersStore } from '~/stores/members';
 import Dialog from '~/components/Dialog.vue';
 import TaskForm from '~/components/tasks/TaskForm.vue';
 import { priorityEnum } from '~/stores/utils';
+import { Task } from "~/stores/tasks";
 
 const props = defineProps<{
   task: Task;

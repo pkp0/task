@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { Member } from '~/stores/members';
 import { priorityEnum, statusesEnum } from '~/stores/utils';
 
-interface Task {
+export interface Task {
     id: number;
     title: string;
     description: string;
